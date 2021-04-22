@@ -12,7 +12,7 @@ def setname():
         r = redis.Redis(host='172.17.0.1', port=6379)
         s = r.set('name', value, ex=30)
 
-        if s == True:
+        if s:
             return 'Cache set successful\n'
         else:
             return 'Cache set failure\n'
@@ -20,8 +20,8 @@ def setname():
 @app.route("/hello")
 def hello():
 
-    r = redis.Redis(host='172.17.0.1', port=6379, decode_responses=True)
-    s = r.get('name')
+    r = redis.Redis(host='172.17.0.1', port=6379)
+    s = str(r.get('name'))
 
     if not s:
         s = "World"
