@@ -6,12 +6,6 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-#p = psycopg2.connect(user="postgres",
-#                     password="postgres",
-#                     host="localhost",
-#                     port="5432",
-#                     database="postgres_db")
-
 app = Flask(__name__)
 
 @app.route("/users", methods = ['POST', 'GET'])
@@ -19,28 +13,42 @@ def users():
 
     if request.method == 'GET':
         name = request.args.get('name')
-        logger.info('name = ' + name + '\n')
         # If both are specified, id takes precedence?
 
-    logger.info('starting GET path')
+    if not name:
+        record = ('','','','')
+        return_string='{"id":"'      + str(record[0]) + \
+                    '", "name":"'    + record[1] + \
+                    '", "address":"' + record[2] + \
+                    '", "phone":"'   + record[3] + '"}'
+        return '\n' + return_string + '\n'
 
-    p = psycopg2.connect(user="postgres",
-                             password="postgres",
-                             host="172.17.0.1",
-                             port="5432",
-                             database="hello")
+    else:
 
-    c = p.cursor()
-    #c.execute("SELECT * FROM users WHERE name = 'Teresa';")
-    c.execute("SELECT * FROM users WHERE name = %s;", (name,))
+        try:
+            p = psycopg2.connect(user="postgres",
+                                password="postgres",
+                                host="172.17.0.1",
+                                port="5432",
+                                database="hello")
 
-    record = c.fetchone()
-    print('\nname = ' + name)
-    print('record = ' + str(record) + '\n')
-    return 'function end'
+            c = p.cursor()
+            c.execute("SELECT * FROM users WHERE name = %s;", (name,))
 
-    c.close()
-    p.close()
+            record = c.fetchone()
+            if not record:
+                record = ('','','','')
+
+            return_string='{"id":"'      + str(record[0]) + \
+                        '", "name":"'    + record[1] + \
+                        '", "address":"' + record[2] + \
+                        '", "phone":"'   + record[3] + '"}'
+            return '\n' + return_string + '\n'
+        except (Exception, Error) as error:
+            return 'Could not connect to cache', 503
+
+        c.close()
+        p.close()
 
 #@app.route("/key", methods = ['POST', 'GET'])
 #def key():
