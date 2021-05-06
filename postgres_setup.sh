@@ -89,4 +89,39 @@ fi
 echo -e "\nDisplaying contents of 'hello' database, 'users' table\n"
 ${EXEC} -it postgres_db psql --username postgres -d hello -a -c "SELECT * FROM users;"
 
+# ----------------------------------------
+
+echo "Check if redis container is running"
+redis_container_id=$(docker ps -a | grep redis_db | awk '{print $1}')
+
+if [ "${redis_container_id}" ]; then
+
+	echo "Stopping redis container"
+	result1a=$(${STOP} redis_db)
+	if [ ${result1a} != "redis_db" ]; then
+		echo -e "\tContainer stop failed"
+		exit 1
+	fi
+	sleep 1 
+
+	if [ "${redis_container_id}" ]; then
+		echo "Removing container"
+		result2a=$(${CONT} ${redis_container_id})
+		if [ ${result2a} != ${redis_container_id} ]; then
+			echo -e "\tContainer remove failed"
+			exit 1
+		fi
+	fi
+
+fi
+sleep 1 
+
+echo "Starting redis container"
+result3a=$(${RUN} --name redis_db -it -p 6379:6379 -d redis:6.2.3)
+if [ ! "${result3a}" ]; then
+	echo -e "\tRedis container not created"
+	exit 1
+fi
+sleep 1 # give docker time to complete
+
 exit
