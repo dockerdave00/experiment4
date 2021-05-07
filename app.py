@@ -91,6 +91,7 @@ def users():
                 print(f"error = {e}" )
                 return 'Database insert failed\n', 503
 
+            p.commit()
             c.close()
             
         if not e:
@@ -160,4 +161,7 @@ if __name__ == '__main__':
     if not success:
         print(f'Could not connect to database')
         exit(1)
+
     app.run(debug=True, host='0.0.0.0')
+
+    p.close()
