@@ -24,11 +24,16 @@ def initialize():
         return False
     return True
 
+def get_list_of_dict(keys, list_of_tuples):
+    list_of_dict = [dict(zip(keys, values)) for values in list_of_tuples]
+    return list_of_dict
+
 @app.route("/users", methods = ['POST', 'GET'])
 def users():
 
     # If both are specified, id takes precedence
     if request.method == 'GET':
+        # curl localhost:5000/users?name=Teresa
 
         c = p.cursor()
 
@@ -38,29 +43,26 @@ def users():
         try:
             if id:
                 c.execute("SELECT * FROM users WHERE id = %s;", (id,))
-                record = c.fetchmany()
+                record = c.fetchone()
             elif name and not id:
                 c.execute("SELECT * FROM users WHERE name = %s;", (name,))
                 record = c.fetchmany()
-            elif not id and not name:
+            else:
                 c.execute("SELECT * FROM users")
                 record = c.fetchall()
         except (Exception) as e:
-            return 'Could not connect to database', 503
+            return 'Database query failed', 503
             exit(1)
 
         if not record:
-            return_string = ""
+            return_dict = {}
         else:
-            return_string = ""
-            for entry in record:
-                entry_string='{"id":"'      + str(entry[0]) + \
-                           '", "name":"'    + entry[1] + \
-                           '", "address":"' + entry[2] + \
-                           '", "phone":"'   + entry[3] + '"}'
-                return_string += entry_string + '\n'
+            keys=("id", "name", "address", "phone")
+            dictionary_out = get_list_of_dict(keys, record)
+            json_out = json.dumps(dictionary_out)
+            return json_out.replace("}, {", "}\n {") + '\n'
 
-        return '\n' + return_string + '\n'
+        return '\n'
         c.close()
 
     if request.method == 'POST':
@@ -147,6 +149,6 @@ def hello():
 if __name__ == '__main__':
     success = initialize()
     if not success:
-        print(f'Could not connect to services, HTTP: 503')
+        print(f'Could not connect to database')
         exit(1)
     app.run(debug=True, host='0.0.0.0')
