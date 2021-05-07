@@ -24,10 +24,6 @@ def initialize():
         return False
     return True
 
-def get_list_of_dict(keys, list_of_tuples):
-    list_of_dict = [dict(zip(keys, values)) for values in list_of_tuples]
-    return list_of_dict
-
 @app.route("/users", methods = ['POST', 'GET'])
 def users():
 
@@ -54,16 +50,20 @@ def users():
             return 'Database query failed', 503
             exit(1)
 
+        c.close()
+
         if not record:
             return_dict = {}
         else:
             keys=("id", "name", "address", "phone")
-            dictionary_out = get_list_of_dict(keys, record)
-            json_out = json.dumps(dictionary_out)
-            return json_out.replace("}, {", "}\n {") + '\n'
+            if id:
+                list_of_dict = dict(zip(keys, record))
+            else:
+                list_of_dict = [dict(zip(keys, values)) for values in record]
+            json_out = json.dumps(list_of_dict)
+            return json_out.replace("}, {", "},\n {") + '\n'
 
-        return '\n'
-        c.close()
+        return 'No record found\n'
 
     if request.method == 'POST':
         e = ""
@@ -73,16 +73,25 @@ def users():
             return 'JSON POST failure', 400
         else:
             columns = d.keys()
-            values = [d[column] for column in columns]
-            insert_statement = 'INSERT INTO users (%s) VALUES %s RETURNING id'
+         
+            name_entry  = d.get('name')
+            addr_entry  = d.get('address')
+            phone_entry = d.get('phone')
+            if not name_entry or not addr_entry or not phone_entry:
+                return 'Input error: Invalid input\n', 400
+
+            insert_statement = 'INSERT INTO users (name, address, phone) VALUES (%s, %s, %s) RETURNING id'
+            data = (name_entry, addr_entry, phone_entry)
 
             try:
                 c = p.cursor()
-                c.execute(insert_statement, (AsIs(','.join(columns)), tuple(values)))
+                c.execute(insert_statement, data)
                 id_of_new_row = c.fetchone()[0]
             except (Exception) as e:
                 print(f"error = {e}" )
-                return 'Could not connect to database', 503
+                return 'Database insert failed\n', 503
+
+            c.close()
             
         if not e:
             return str(id_of_new_row) + '\n'
