@@ -27,16 +27,12 @@ def initialize():
 @app.route("/users", methods = ['POST', 'GET'])
 def users():
 
-    # If both are specified, id takes precedence
     if request.method == 'GET':
-        # curl localhost:5000/users?name=Teresa
-
-        c = p.cursor()
-
         id   = request.args.get('id')
         name = request.args.get('name')
 
         try:
+            c = p.cursor()
             if id:
                 c.execute("SELECT * FROM users WHERE id = %s;", (id,))
                 record = c.fetchone()
@@ -47,33 +43,24 @@ def users():
                 c.execute("SELECT * FROM users")
                 record = c.fetchall()
         except (Exception) as e:
+            c.close()
             return 'Database query failed', 503
-            exit(1)
-
-        c.close()
-
-        if not record:
-            return_dict = {}
-        else:
+        finally:
             keys=("id", "name", "address", "phone")
             if id:
                 list_of_dict = dict(zip(keys, record))
             else:
                 list_of_dict = [dict(zip(keys, values)) for values in record]
             json_out = json.dumps(list_of_dict)
+            c.close()
             return json_out.replace("}, {", "},\n {") + '\n'
 
-        return 'No record found\n'
 
     if request.method == 'POST':
-        e = ""
-        # curl -X POST -H "Content-Type:application/json" -d '{"name":"Chris", "address":"2345 DNA Dumpster Lane", "phone":"123-456-7890"}' localhost:5000/users
         d = request.get_json()
         if not d:
             return 'JSON POST failure', 400
         else:
-            columns = d.keys()
-         
             name_entry  = d.get('name')
             addr_entry  = d.get('address')
             phone_entry = d.get('phone')
@@ -88,17 +75,14 @@ def users():
                 c.execute(insert_statement, data)
                 id_of_new_row = c.fetchone()[0]
             except (Exception) as e:
-                print(f"error = {e}" )
+                c.close()
                 return 'Database insert failed\n', 503
+            finally:
+                p.commit()
+                c.close()
+                return 'New entry id : ' + str(id_of_new_row) + '\n'
 
-            p.commit()
-            c.close()
             
-        if not e:
-            return str(id_of_new_row) + '\n'
-        else:
-            return '\n END FUNCTION \n'
-
 @app.route("/key", methods = ['POST', 'GET'])
 def key():
 
