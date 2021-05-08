@@ -1,15 +1,89 @@
 # udpate for pull request
 from flask import Flask, request, render_template
 import redis
+import psycopg2
+from psycopg2.extensions import AsIs
 import json
 import logging
 
 logger = logging.getLogger(__name__)
 
-r = redis.Redis(host='172.17.0.1', port=6379)
-
 app = Flask(__name__)
 
+def initialize():
+    global p
+    global r
+    try:
+        p = psycopg2.connect(user="postgres",
+                            password="postgres",
+                            host="172.17.0.1",
+                            port="5432",
+                            database="hello")
+
+        r = redis.Redis(host='172.17.0.1', port=6379)
+    except (Exception) as e:
+        return False
+    return True
+
+@app.route("/users", methods = ['POST', 'GET'])
+def users():
+
+    if request.method == 'GET':
+        id   = request.args.get('id')
+        name = request.args.get('name')
+
+        try:
+            c = p.cursor()
+            if id:
+                c.execute("SELECT * FROM users WHERE id = %s;", (id,))
+                record = c.fetchone()
+            elif name and not id:
+                c.execute("SELECT * FROM users WHERE name = %s;", (name,))
+                record = c.fetchmany()
+            else:
+                c.execute("SELECT * FROM users")
+                record = c.fetchall()
+        except (Exception) as e:
+            c.close()
+            return 'Database query failed', 503
+        finally:
+            keys=("id", "name", "address", "phone")
+            if id:
+                list_of_dict = dict(zip(keys, record))
+            else:
+                list_of_dict = [dict(zip(keys, values)) for values in record]
+            json_out = json.dumps(list_of_dict)
+            c.close()
+            return json_out.replace("}, {", "},\n {") + '\n'
+
+
+    if request.method == 'POST':
+        d = request.get_json()
+        if not d:
+            return 'JSON POST failure', 400
+        else:
+            name_entry  = d.get('name')
+            addr_entry  = d.get('address')
+            phone_entry = d.get('phone')
+            if not name_entry or not addr_entry or not phone_entry:
+                return 'Input error: Invalid input\n', 400
+
+            insert_statement = 'INSERT INTO users (name, address, phone) VALUES (%s, %s, %s) RETURNING id'
+            data = (name_entry, addr_entry, phone_entry)
+
+            try:
+                c = p.cursor()
+                c.execute(insert_statement, data)
+                id_of_new_row = c.fetchone()[0]
+            except (Exception) as e:
+                c.close()
+                return 'Database insert failed\n', 503
+            finally:
+                p.commit()
+                c.close()
+                return 'New entry id : ' + str(id_of_new_row) + '\n'
+
+            
 @app.route("/key", methods = ['POST', 'GET'])
 def key():
 
@@ -32,6 +106,7 @@ def key():
             return 'Could not connect to cache', 503
 
     if request.method == 'POST':
+    # curl -X POST -H "Content-Type:application/json" -d '{"key":"name", "value":"dave"}' localhost:5000/key
 
         logger.info('starting POST path')
         d = request.get_json()
@@ -56,9 +131,6 @@ def key():
             except Exception as e:
                 return 'Could not write to cache', 503
 
-
-
-
 @app.route("/hello")
 def hello():
 
@@ -70,4 +142,11 @@ def hello():
     return 'Hello, ' + s  + '!\n'
      
 if __name__ == '__main__':
+    success = initialize()
+    if not success:
+        print(f'Could not connect to database')
+        exit(1)
+
     app.run(debug=True, host='0.0.0.0')
+
+    p.close()
