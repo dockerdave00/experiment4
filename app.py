@@ -2,7 +2,6 @@
 from flask import Flask, request, render_template
 import redis
 import psycopg2
-from psycopg2.extensions import AsIs
 import json
 import logging
 
@@ -54,7 +53,7 @@ def users():
                 list_of_dict = [dict(zip(keys, values)) for values in record]
             json_out = json.dumps(list_of_dict)
             c.close()
-            return json_out.replace("}, {", "},\n {") + '\n'
+            return json_out
 
 
     if request.method == 'POST':
@@ -76,6 +75,7 @@ def users():
                 c.execute(insert_statement, data)
                 id_of_new_row = c.fetchone()[0]
             except (Exception) as e:
+                c.rollback()
                 c.close()
                 return 'Database insert failed\n', 503
             finally:
@@ -150,3 +150,4 @@ if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
 
     p.close()
+    r.close()
