@@ -48,23 +48,17 @@ jobs:
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
 
+      - name: Slack Notification
+        uses: actions/checkout@v2
 
-on: push
-name: Slack Notification
-jobs:
-  slackNotification:
-    name: Slack Notification
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actoins/checkout@v2
-    - name: Slack Notification
-      uses: U0201217E06/action-slack-notify@v2
-      env:
-        SLACK_CHANNEL: releases
-        SLACK_MESSAGE: 'New python push'
-        SLACK_TITLE: PYTHON PUSH
-        SLACK_USERNAME: Papa Chubby
-        SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+      - name: Slack Notification
+        uses: U0201217E06/action-slack-notify@v2
+        env:
+          SLACK_CHANNEL: releases
+          SLACK_MESSAGE: 'New python push'
+          SLACK_TITLE: PYTHON PUSH
+          SLACK_USERNAME: Papa Chubby
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         
 
 
