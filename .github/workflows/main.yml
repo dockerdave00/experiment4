@@ -24,12 +24,8 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
 
-      echo "::debug::Start steps"
-
       - name: Check Out Repo
         uses: actions/checkout@v2
-        
-      echo "::debug::Login to Docker"
               
       - name: Login to Docker Hub
         uses: docker/login-action@v1
@@ -40,9 +36,7 @@ jobs:
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v1
-        
-      echo "::debug::Docker Build and Push"
-              
+                      
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v2
@@ -55,10 +49,8 @@ jobs:
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
 
-      echo "::debug::Start Slack Notification"
-      
       - name: Slack Notification
-        uses: U0201217E06/action-slack-notify@v2
+        uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_CHANNEL: releases
           SLACK_MESSAGE: 'New python push'
