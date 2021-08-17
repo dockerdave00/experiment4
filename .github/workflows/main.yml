@@ -49,9 +49,6 @@ jobs:
         run: echo ${{ steps.docker_build.outputs.digest }}
 
       - name: Slack Notification
-        uses: actions/checkout@v2
-
-      - name: Slack Notification
         uses: U0201217E06/action-slack-notify@v2
         env:
           SLACK_CHANNEL: releases
