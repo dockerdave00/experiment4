@@ -28,6 +28,10 @@ jobs:
 
       - name: Check Out Repo
         uses: actions/checkout@v2
+        
+      - name: Set Environment Variables
+        run: echo "GIT_SHA=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_ENV
+          
               
       - name: Login to Docker Hub
         uses: docker/login-action@v1
@@ -46,7 +50,9 @@ jobs:
           context: ./
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/hello-python:latest, ${{ secrets.DOCKER_HUB_USERNAME }}/hello-python:${{ env.SHA8 }}
+          tags: |
+            ${{ secrets.DOCKER_HUB_USERNAME }}/hello-python:latest
+            ${{ secrets.DOCKER_HUB_USERNAME }}/hello-python:${{ env.GIT_SHA }}
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
