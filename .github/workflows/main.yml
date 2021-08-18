@@ -45,7 +45,7 @@ jobs:
           file: ./Dockerfile
           push: true
           # tags: ${{ secrets.DOCKER_HUB_USERNAME }}/hello-python:latest, ${{ secrets.DOCKER_HUB_USERNAME }}/hello-python:$SHA8
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/hello-python:${{ GITHUB_SHA }}
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/hello-python:$GITHUB_SHA::8
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
