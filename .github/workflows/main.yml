@@ -43,7 +43,7 @@ jobs:
         run: echo "Short Sha from GITHUB_SHA = ${GITHUB_SHA::8}"
         
       - name: Output VER_CONST variable
-        run: echo "VER_CONST = ${VER_CONST"}"
+        run: echo "VER_CONST = ${VER_CONST}"
                       
       - name: Build and push
         id: docker_build
