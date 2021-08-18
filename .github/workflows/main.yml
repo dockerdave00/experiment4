@@ -36,6 +36,9 @@ jobs:
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v1
+        
+      - name: Output commit sha
+        run: echo "GITHUB_SHA = $GITHUB_SHA"
                       
       - name: Build and push
         id: docker_build
@@ -44,8 +47,8 @@ jobs:
           context: ./
           file: ./Dockerfile
           push: true
-          # tags: ${{ secrets.DOCKER_HUB_USERNAME }}/hello-python:latest, ${{ secrets.DOCKER_HUB_USERNAME }}/hello-python:$SHA8
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/hello-python:$GITHUB_SHA
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/hello-python:latest
+          # tags: ${{ secrets.DOCKER_HUB_USERNAME }}/hello-python:$GITHUB_SHA
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
