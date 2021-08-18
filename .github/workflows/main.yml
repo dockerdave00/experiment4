@@ -38,7 +38,7 @@ jobs:
         uses: docker/setup-buildx-action@v1
         
       - name: Output commit sha
-        run: echo "GITHUB_SHA = $GITHUB_SHA"
+        run: echo "Short Sha from GITHUB_SHA = $GITHUB_SHA::8"
                       
       - name: Build and push
         id: docker_build
