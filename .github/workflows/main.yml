@@ -19,8 +19,8 @@ jobs:
   build:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
-    # env:
-    #  SHA8: ${GITHUB_SHA::8}
+    env:
+      SHA8: ${GITHUB_SHA::8}
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -46,7 +46,7 @@ jobs:
           context: ./
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/hello-python:latest, ${{ secrets.DOCKER_HUB_USERNAME }}/hello-python:${{ env.GITHUB_SHA }}
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/hello-python:latest, ${{ secrets.DOCKER_HUB_USERNAME }}/hello-python:${{ env.SHA8 }}
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
