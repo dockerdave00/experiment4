@@ -19,8 +19,8 @@ jobs:
   build:
     # The type of runner that the job will run on
     runs-on: ubuntu-latest
-    env:
-      VER_CONST: 5.5.1
+    # env:
+    #  SHA8: ${GITHUB_SHA::8}
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
@@ -39,12 +39,6 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@v1
         
-      - name: Output commit sha
-        run: echo "Short Sha from GITHUB_SHA = ${GITHUB_SHA::8}"
-        
-      - name: Output VER_CONST variable
-        run: echo "VER_CONST = ${VER_CONST}"
-                      
       - name: Build and push
         id: docker_build
         uses: docker/build-push-action@v2
@@ -52,7 +46,7 @@ jobs:
           context: ./
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/hello-python:latest, ${{ secrets.DOCKER_HUB_USERNAME }}/hello-python:${VER_CONST}
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/hello-python:latest, ${{ secrets.DOCKER_HUB_USERNAME }}/hello-python:${{ env.GITHUB_SHA::8 }}
 
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
