@@ -61,8 +61,8 @@ jobs:
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_CHANNEL: releases
-          SLACK_MESSAGE: 'New python push'
-          SLACK_TITLE: PYTHON PUSH
+          SLACK_MESSAGE: https://hub.docker.com/repository/docker/davidwnorrisjr/hello-python/tags?page=1&ordering=last_updated&name=${{ env.GIT_SHA }}'
+          SLACK_TITLE: Dockerhub URL
           SLACK_USERNAME: Papa Chubby
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
         
