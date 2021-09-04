@@ -21,6 +21,7 @@ def initialize():
 
         r = redis.Redis(host='172.17.0.1', port=6379)
     except (Exception) as e:
+        logging.exception("message")
         return False
     return True
 
