@@ -1,10 +1,10 @@
 version: '3'
 services:
-    redis:
-        container_name: redis_db 
-        image: redis:6.2.3
-        ports:
-          - 6379:6379
+#    redis:
+#        container_name: redis_db 
+#        image: redis:6.2.3
+#        ports:
+#          - 6379:6379
 
     postgres:
         container_name: postgres_db
@@ -21,3 +21,5 @@ services:
         image: hello:latest
         ports:
           - 80:5000
+        env_file:
+          - production.env 
