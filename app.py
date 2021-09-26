@@ -4,6 +4,7 @@ import redis
 import psycopg2
 import json
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
