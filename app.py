@@ -13,13 +13,20 @@ def initialize():
     global p
     global r
     try:
+
+        postgres_host = os.getenv("POSTGRES_HOST")
+        postgres_port = os.getenv("POSTGRES_PORT")
+
+        redis_host = os.getenv("REDIS_HOST")
+        redis_port = os.getenv("REDIS_PORT")
+
         p = psycopg2.connect(user="postgres",
                             password="postgres",
-                            host="172.17.0.1",
-                            port="5432",
+                            host=postgres_host,
+                            port=postgres_port,
                             database="hello")
+        r = redis.Redis(host=redis_host, port=redis_port)
 
-        r = redis.Redis(host='172.17.0.1', port=6379)
     except (Exception) as e:
         logging.exception("message")
         return False
