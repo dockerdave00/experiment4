@@ -5,20 +5,20 @@ services:
 #        image: redis:6.2.3
 #        ports:
 #          - 6379:6379
-
-    postgres:
-        container_name: postgres_db
-        image: postgres:13.2
-        ports:
-          - 5432:5432
-        environment:
-          - POSTGRES_PASSWORD=postgres
-        volumes:
-          - /var/lib/postgresql/data:/var/lib/postgresql/data/ 
+#
+#    postgres:
+#        container_name: postgres_db
+#        image: postgres:13.2
+#        ports:
+#          - 5432:5432
+#        environment:
+#          - POSTGRES_PASSWORD=postgres
+#        volumes:
+#          - /var/lib/postgresql/data:/var/lib/postgresql/data/ 
 
     flask:
         container_name: flask_server
-        image: hello:latest
+        image: davidwnorrisjr/hello-python:latest
         ports:
           - 80:5000
         env_file:
